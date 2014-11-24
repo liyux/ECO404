@@ -1,12 +1,13 @@
 function [revenue, consumption, hhdemand] = computeDemand(hhmatrix, demandFunc, pxstructure)
 
-numBlks = numel(pxstructure)/2;
+fixedCharge = pxstructure(end);
+numBlks = (numel(pxstructure)-1)/2;
 upperLimits = pxstructure(1:numBlks);
 priceVector = pxstructure(numBlks+1:end);
 
 numhh = size(hhmatrix,1);
 
-incAdjustment = 0;
+incAdjustment = -fixedCharge;
 lowerLimit = [0 upperLimit(1:end-1)];
 for i=2:numBlks
     incAdjustment(i) = (priceVector(i) - priceVector(i-1))*(upperLimit(i-1)-lowerLimit(i-1)) + incAdjustment(i-1);

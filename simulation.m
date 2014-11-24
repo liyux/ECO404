@@ -6,9 +6,12 @@ demandFunc.price = -0.5;
 
 % priceStructure is a column vector who first numBlks elements are the
 % upper limits and whose second numBlks elements are the corresponding
-% prices
-priceStructure = [7500 30000 1000000 0 4.42 5.25]';
+% prices and whose last element is the fixed charge.
+priceStructure = [7500 30000 +Inf 0 4.42 5.25 ]';
 
 
 
-revDiff = revenueConstraint(basePxStructure,upRev,hhmatrix,demandCoeff)
+revDiff = revenueConstraint(basePxStructure,upRev,hhmatrix,demandCoeff);
+
+%%%%%%%%%%%%%%%%%%%%%%%Don't write anything below here%%%%%%%%%%%%%%%
+optimizePxStrucutre %susan will create a script that solves for the price structure that sets revDiff to zero
