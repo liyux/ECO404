@@ -1,11 +1,19 @@
 function [revenue, consumption, hhdemand] = computeDemand(hhmatrix, demandFunc, pxstructure)
 
-% obtain prices from each block in pxstructure
-p1 = pxstructure(2,1);
-p2 = pxstructure(2,2);
-p3 = pxstructure(2,3);
-x1 = pxstructure(1,1);
-x2 = pxstructure(1,2);
+if isodd(numel(pxstructure))
+    error('Price structure needs an even number of elements')
+end
+
+numBlks = numel(pxstructure)/2;
+upperLimits = pxstructure(1:numBlks);
+priceVector = pxstructure(numBlks+1:end);
+
+numhh = size(hhmatrix,1);
+
+incAdjustment = 0;
+for i=2:numBlks
+    incAdjustment(i) = (priceVector(i) - priceVector(i-1))*upperLimit(i-1) + incAdjustment(i-1);
+end
 
 % calculate adjusted income
 d1 = 0;
@@ -17,13 +25,9 @@ y3 = hhmatrix(1:numhh,3) + d3;
 adjIncome = [y1 y2 y3];
 
 % calculate conditional demand
-hhFactors = hhmatrix.^demandFunc(1,1:5); %how to take power?
-priceFactor = pxstructure(2,1:3).^demandFunc(1,6); %make row vector into matrix?
-incomeFactor = adjIncome.^demandFunc(1,7);
-
-condd1 = %multiply every element in hhFactors * price & income factor
-condd2
-condd3
+priceFactor = pxstructure(2,1:3).^demandFunc.price; %make row vector into matrix?
+hhFactors = hhMatrix*demandFunc.coeff; %how to take power?
+cond_demand = repmat(priceFactor,numhh,1)+repmat(hhFactors,1,numBlks)+ adjIncome*demandFunc.income;
 
 %6 add outputs from each block to get total household demand
 
