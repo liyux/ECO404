@@ -18,8 +18,10 @@ pxStrInfo.base = [7500 30000 +Inf 0 4.42 5.25 10]';
 endogPS = 4.52;
 goalRev = 10e7;
 
+[goalRev, consumption, hhdemand] = computeDemand(demandInfo, [+Inf; 5;0]); %compute the demand under uniform pricing
+
 revDiff = revenueConstraint(endogPS,pxStrInfo,goalRev,demandInfo);
 
 %%%%%%%%%%%%%%%%%%%%%%%Don't write anything below here%%%%%%%%%%%%%%%
-[optStr,fval,exitflag] = fsolve(@(endogPS) revenueConstraint(endogPS,goalRev,pxStrInfo,demandInfo),pxStrInfo.base);
+[optStr,fval,exitflag] = fsolve(@(endogPS) revenueConstraint(endogPS,pxStrInfo,goalRev,demandInfo),pxStrInfo.base(pxStrInfo.endog));
 

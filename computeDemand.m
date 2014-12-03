@@ -25,7 +25,7 @@ priceVectorlog = log(priceVector) %log of 0 --> inf
 % calculate conditional demand
 priceFactor = priceVectorlog.*demandInfo.price;
 hhFactors = hhmatrixlog*demandInfo.hh_coeff;
-cond_demand = repmat(priceFactor,numhh,1)+repmat(hhFactors,1,numBlks)+ adjIncomelog*demandInfo.income;
+cond_demand = repmat(priceFactor',numhh,1)+repmat(hhFactors,1,numBlks)+ adjIncomelog*demandInfo.income;
 
 %6 add outputs from each block to get total household demand
 
