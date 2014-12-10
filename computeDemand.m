@@ -23,41 +23,44 @@ adjIncomelog = log(adjIncome);
 priceVectorlog = log(priceVector); %log of 0 --> inf
 
 % calculate conditional demand
-priceFactor = (priceVectorlog.*demandInfo.price)';
+priceFactor(1,:) = (priceVectorlog.*demandInfo.price); %force row vector
 hhFactors = hhmatrixlog*demandInfo.hh_coeff;
 incomeFactor = adjIncomelog.*demandInfo.income;
 cond_demand_log = repmat(priceFactor,numhh,1) + repmat(hhFactors,1,numBlks) + incomeFactor;
 cond_demand = exp(cond_demand_log);
 
 %get actual demand
-for i = 1:numBlks
-    checkCondd(1:numhh,i) = (cond_demand(1:numhh,i) < upperLimit(i)*0.001) & (cond_demand(1:numhh,i) > lowerLimit(i)*0.001); 
+if numBlks>1
+
+    for i = 1:numBlks
+        checkCondd(:,i) = (cond_demand(:,i) < upperLimit(i)) & (cond_demand(:,i) > lowerLimit(i)); 
+    end
+
+    for i = 1:(numBlks-1)
+        checkKink(:,i) = (cond_demand(:,i) > upperLimit(i)) & (cond_demand(:,i+1) < lowerLimit(i+1));  
+    end
+
+    isBlock = checkCondd.*cond_demand;
+    isBlock(isnan(isBlock)) = 0;
+    hhdemand = sum(isBlock,2) + sum(checkKink.*repmat(upperLimit(1:numBlks-1)',numhh,1),2);
+
+    %multiply qty demanded in each block by appropriate MP
+    for i = 1:numBlks
+        demandInBlock(:,i) = (hhdemand>upperLimit(i)).*(upperLimit(i)-lowerLimit(i))+ ...
+                (hhdemand>lowerLimit(i)).*(hhdemand<=upperLimit(i)).*(hhdemand-lowerLimit(i));
+    end
+
+    hhexpBlocks = demandInBlock.*repmat(priceVector',numhh,1);
+
+    %sum to get expenditure per household
+    hhexp = sum(hhexpBlocks,2) + fixedCharge;
+
+else
+    hhdemand = cond_demand;
+    hhexp = hhdemand*priceVector + fixedCharge;
 end
 
-for i = 1:(numBlks-1)
-    checkKink(1:numhh,i) = (cond_demand(1:numhh,i) > upperLimit(i)*0.001) & (cond_demand(1:numhh,i+1) < lowerLimit(i+1)*0.001);  
-end
-
-isBlock = checkCondd.*cond_demand;
-isBlock(isnan(isBlock)) = 0;
-hhdemand = sum(isBlock,2) + sum(checkKink.*repmat(upperLimit(1:numBlks-1)',numhh,1),2)*0.001;
-aggdemand = sum(hhdemand);
-
-%multiply qty demanded in each block by appropriate MP
-for i = 1:numBlks
-    demandInBlock(:,i) = .001*(hhdemand>.001*upperLimit(i)).*(upperLimit(i)-lowerLimit(i))+ ...
-            (hhdemand>.001*lowerLimit(i)).*(hhdemand<=.001*upperLimit(i)).*(hhdemand-.001*lowerLimit(i));
-end
-
-hhexpBlocks = demandInBlock.*repmat(priceVector',numhh,1);
-
-%sum to get expenditure per household
-hhexp = sum(hhexpBlocks,2) + fixedCharge;
-
-%sum to get total expenditure
-aggexp = sum(hhexp);
-
-hhdemand;
-revenue = aggexp;
-consumption = aggdemand;
+%sum to get total expenditure and consumption
+revenue = sum(hhexp);
+consumption = sum(hhdemand);
 end
