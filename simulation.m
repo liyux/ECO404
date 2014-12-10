@@ -10,15 +10,13 @@ demandInfo.hhIncome = hhIncome;
 pxStrInfo.blks = 3;
 endogPrices = 2; endogUlims = []; endogFixed = [];
 pxStrInfo.endog = [endogUlims endogPrices+pxStrInfo.blks endogFixed+2*pxStrInfo.blks];
-pxStrInfo.base = [7500 30000 +Inf 0 4.42 5.25 10]';
+pxStrInfo.base = [7500 30000 1e6 0 4.42 5.25 28]';
 
 % priceStructure is a column vector who first numBlks elements are the
 % upper limits and whose second numBlks elements are the corresponding
 % prices and whose last element is the fixed charge.
 endogPS = 4.52;
 goalRev = 10e7;
-
-[goalRev, consumption, hhdemand] = computeDemand(demandInfo, [+Inf; 5;0]); %compute the demand under uniform pricing
 
 revDiff = revenueConstraint(endogPS,pxStrInfo,goalRev,demandInfo);
 
