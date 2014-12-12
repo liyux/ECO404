@@ -7,6 +7,7 @@ pxStructure = pxStrInfo.base;
 pxStructure(pxStrInfo.endog) = endogPS;
 
 revenue = computeDemand(demandInfo,pxStructure);
+consumption = computeDemand(demandInfo,pxStructure);
 
 d = revenue - goalRev;
 end
