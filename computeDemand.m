@@ -29,7 +29,7 @@ incomeFactor = adjIncomelog.*demandInfo.income;
 cond_demand_log = repmat(priceFactor,numhh,1) + repmat(hhFactors,1,numBlks) + incomeFactor;
 cond_demand = exp(cond_demand_log);
 
-%get actual demand
+%get actual demandprice
 if numBlks>1
 
     for i = 1:numBlks

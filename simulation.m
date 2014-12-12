@@ -8,7 +8,11 @@ demandInfo.price = -0.5;
 demandInfo.hhmatrix = hhmatrix;
 demandInfo.hhIncome = hhIncome;
 
-pxStrInfo.base = [2 7 18 50 75 100 1e6 [eps 2.22 2.27 2.32 2.37 2.52 2.67 40]*.61]';
+baseUlims = [2 7 18 50 75 100 1e6];
+basePrice = [eps 2.22 2.27 2.32 2.37 2.52 2.67]*.61;
+baseFC = 40*.61;
+
+pxStrInfo.base = [baseUlims(1) baseUlims(2:end)-baseUlims(1:end-1) basePrice(1) basePrice(2:end)-basePrice(1:end-1) baseFC]';
 pxStrInfo.blks = 7;
 endogPrices = 2; endogUlims = []; endogFixed = [];
 pxStrInfo.endog = [endogUlims endogPrices+pxStrInfo.blks endogFixed+2*pxStrInfo.blks];
@@ -17,7 +21,7 @@ pxStrInfo.endog = [endogUlims endogPrices+pxStrInfo.blks endogFixed+2*pxStrInfo.
 % upper limits and whose second numBlks elements are the corresponding
 % prices and whose last element is the fixed charge.
 
-[baseRev, baseCons, baseDemand] = computeDemand(demandInfo,pxStrInfo.base);
+[baseRev, baseCons, baseDemand] = computeDemand(demandInfo,[baseUlims basePrice baseFC]');
 pxStrU.blks = 1;
 pxStrU.endog = 2;
 uniformPriceGuess = 2.5;
@@ -25,7 +29,7 @@ pxStrU.base = [1e6 uniformPriceGuess 40*.61]';
 
 [uniformPrice,fval,exitflag] = fsolve(@(uniformPrice) revenueConstraint(uniformPrice,pxStrU,baseRev,demandInfo),uniformPriceGuess);
 
-if exitflag~=1
+if exitflag<1
     keyboard
 end
 uniformPxStr = pxStrU.base;
@@ -37,10 +41,13 @@ endogPS = uniformPrice;
 
 csPrices = []; csUlims = 1; csFixed =[]; %can only have one cs variable at a time
 csIndices = [csUlims csPrices+pxStrInfo.blks csFixed+2*pxStrInfo.blks];
-csUlimVals = [0 2 4];
+csUlimVals = [1.5 2 2.5];
 for ii=1:length(csUlimVals)
     pxStrInfo.base(csIndices) = csUlimVals(ii);
     [optStr,fval,exitflag] = fsolve(@(endogPS) revenueConstraint(endogPS,pxStrInfo,goalRev,demandInfo),endogPS);
+    if exitflag<1;
+        keyboard
+    end
 
     optEndog(ii) = optStr;
     pxOpt = pxStrInfo.base;

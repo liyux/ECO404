@@ -47,9 +47,11 @@ constant = 1;
 inflationAdj = 0.715/1.172;
 
 %import raw data with numhh, hhincome & hvalue
-rawData = csvread('/Users/yuxinli/Documents/MATLAB/ECO404New/ECO404/denton2013.csv',2);
+rawData = csvread('denton2013.csv',2);
+rawData = rawData(find(rawData(:,2)>1000),:);
+
 numhh = size(rawData,1);
-numpeople = rawData(1:numhh,1);
+numpeople = rawData(:,1);
 hvalue = rawData(1:numhh,3) * inflationAdj * 0.001;
 
 lawnsize=normrnd(0.3590,1.026,[2*numhh,1]);
@@ -58,3 +60,4 @@ lawnsize = lsubset(1:numhh);
 
 hhmatrix = [exp(1)*ones(numhh,1) numpeople hvalue lawnsize weather*ones(numhh,1)];
 hhIncome = rawData(1:numhh,2) * inflationAdj * 0.001;
+
