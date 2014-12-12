@@ -50,11 +50,14 @@ for ii=1:length(csUlimVals)
     end
 
     optEndog(ii) = optStr;
-    pxOpt = pxStrInfo.base;
-    pxOpt(pxStrInfo.endog) = optStr;
-     
-    [optRev, optCons, optDemand] =  computeDemand(demandInfo,pxOpt);
+    pxOptInc = pxStrInfo.base;
+    pxOptInc(pxStrInfo.endog) = optStr;
+    
+    pxOpt = convertPX(pxOptInc);
+    [optRev, optCons, optHHInfo] =  computeDemand(demandInfo,pxOpt);
     
     optOutput.Cons(ii) = optCons;
-    optOutput.Demand(:,ii) = optDemand;
+    hhInfo{ii} = optHHInfo;
 end
+
+hhInfo{1}

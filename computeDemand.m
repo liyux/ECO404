@@ -1,4 +1,4 @@
-function [revenue, consumption, hhdemand] = computeDemand(demandInfo, pxstructure)
+function [revenue, consumption, hhInfo] = computeDemand(demandInfo, pxstructure)
 
 fixedCharge = pxstructure(end);
 numBlks = (numel(pxstructure)-1)/2;
@@ -63,4 +63,6 @@ end
 %sum to get total expenditure and consumption
 revenue = sum(hhexp);
 consumption = sum(hhdemand);
+hhInfo.demand = hhdemand;
+hhInfo.hhexp = hhexp;
 end
