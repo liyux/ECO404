@@ -8,9 +8,12 @@ demandInfo.price = -0.5;
 demandInfo.hhmatrix = hhmatrix;
 demandInfo.hhIncome = hhIncome;
 
-baseUlims = [2 7 18 50 75 100 1e6];
-basePrice = [eps 2.22 2.27 2.32 2.37 2.52 2.67]*.61;
-baseFC = 40*.61;
+%baseUlims = [2 7 18 50 75 100 1e6];
+%basePrice = [eps 2.22 2.27 2.32 2.37 2.52 2.67]*inflationAdj;
+%baseFC = 40*inflationAdj;
+baseUlims = [1e6];
+basePrice = [3.8*inflationAdj];
+baseFC = [0];
 
 pxStrInfo.base = [baseUlims(1) baseUlims(2:end)-baseUlims(1:end-1) basePrice(1) basePrice(2:end)-basePrice(1:end-1) baseFC]';
 pxStrInfo.blks = 7;
@@ -25,7 +28,7 @@ pxStrInfo.endog = [endogUlims endogPrices+pxStrInfo.blks endogFixed+2*pxStrInfo.
 pxStrU.blks = 1;
 pxStrU.endog = 2;
 uniformPriceGuess = 2.5;
-pxStrU.base = [1e6 uniformPriceGuess 40*.61]';
+pxStrU.base = [1e6 uniformPriceGuess 40*inflationAdj]';
 
 [uniformPrice,fval,exitflag] = fsolve(@(uniformPrice) revenueConstraint(uniformPrice,pxStrU,baseRev,demandInfo),uniformPriceGuess);
 
@@ -49,7 +52,7 @@ for ii=1:length(csUlimVals)
         keyboard
     end
 
-    optEndog(ii) = optStr;
+    optEndog(ii) = optStr; %gives uniform price
     pxOptInc = pxStrInfo.base;
     pxOptInc(pxStrInfo.endog) = optStr;
     
@@ -57,6 +60,8 @@ for ii=1:length(csUlimVals)
     [optRev, optCons, optHHInfo] =  computeDemand(demandInfo,pxOpt);
     
     optOutput.Cons(ii) = optCons;
+    optOutput.Rev(ii) = optRev;
+    optOutput.PX(ii,:) = pxOpt;
     hhInfo{ii} = optHHInfo;
 end
 

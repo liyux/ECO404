@@ -10,5 +10,6 @@ pxStructure = convertPX(pxIncreases);
 
 [revenue,consumption,hhInfo] = computeDemand(demandInfo,pxStructure);
 
+
 d = revenue - goalRev;
 end
