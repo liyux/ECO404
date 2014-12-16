@@ -10,17 +10,10 @@ numhh = size(hhmatrix,1);
 
 incAdjustment = -fixedCharge;
 lowerLimit = [0; upperLimit(1:end-1)];
-blockSize = upperLimit - lowerLimit;
 
-%savings is a numBlks x numBlks matrix each row gives the savings that were
-%realized by consuming previous blocks at a lower price. 
-for ii=1:numBlks
-    savings(ii,:) = (priceVector(ii) - priceVector).*blockSize;
+for i=2:numBlks
+    incAdjustment(i) = (priceVector(i) - priceVector(i-1))*(upperLimit(i-1)-lowerLimit(i-1)) + incAdjustment(i-1);
 end
-if isnan(savings(end,end))
-    savings(end,end) = 0;
-end
-incAdjustment = sum(tril(savings),2); %"savings" from higher blocks don't matter
 
 incAdjustment = incAdjustment*.001; %scaling factor
 adjIncome = repmat(demandInfo.hhIncome,1,numBlks)+repmat(incAdjustment,numhh,1);
