@@ -8,3 +8,4 @@ demandInfo.price = -0.5;
 demandInfo.hhmatrix = hhmatrix;
 demandInfo.hhIncome = hhIncome;
 
+experiments
