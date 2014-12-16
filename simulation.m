@@ -1,3 +1,4 @@
+clear all
 dbstop if error
 createHouseholds
 
@@ -5,15 +6,12 @@ createHouseholds
 demandInfo.hh_coeff = [-0.157 0.291 0.312 0.0247 0.979]'; 
 demandInfo.income = 0.15;
 demandInfo.price = -0.5;
-demandInfo.hhmatrix = hhmatrix;
-demandInfo.hhIncome = hhIncome;
+demandInfo.hhmatrix = hhmatrix(1:10,:);
+demandInfo.hhIncome = hhIncome(1:10,:);
 
-%baseUlims = [2 7 18 50 75 100 1e6];
-%basePrice = [eps 2.22 2.27 2.32 2.37 2.52 2.67]*inflationAdj;
-%baseFC = 40*inflationAdj;
-baseUlims = [1e6];
-basePrice = [3.8*inflationAdj];
-baseFC = [0];
+baseUlims = [2 7 18 50 75 100 Inf];
+basePrice = [eps 2.22 2.27 2.32 2.37 2.52 2.67]*inflationAdj;
+baseFC = 40*inflationAdj;
 
 pxStrInfo.base = [baseUlims(1) baseUlims(2:end)-baseUlims(1:end-1) basePrice(1) basePrice(2:end)-basePrice(1:end-1) baseFC]';
 pxStrInfo.blks = 7;
