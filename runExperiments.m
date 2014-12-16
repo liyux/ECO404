@@ -1,5 +1,8 @@
-solveOptions = optimoptions('fsolve','Display','iter');
-%,'outputFcn','@checkprogess');
+function csOutput = runExperiments(csArray,arrayCol,demandInfo);
+solveOptions = optimoptions('fsolve','Display','iter','outputFcn',@checkProgess);
+history.x = [];
+history.fval = [];
+searchdir = [];
 
 [numExp,csCols] = size(csArray);
 for jj=1:numExp
@@ -67,6 +70,50 @@ for jj=1:numExp
         optOutput(ii,jj).FCs = pxOpt(end);
         optOutput(ii,jj).hhInfo = optHHInfo;
     end
+
+    csOutput.optOutput = optOutput;
+    csOutput.uniform = uniformOutput;
+end
+
+function stop = outfun(x,optimValues,state)
+    stop = false;
+
+    switch state
+        case 'init'
+            hold on
+        case 'iter'
+            if iscolumn(fval)
+                history.fval = [history.fval; optimValues.fval'];
+            else
+                history.fval = [history.fval; optimValues.fval];
+            end
+            if iscolumn(x)
+                history.x = [history.x; x'];
+            else
+                history.x = [history.x; x];
+            end
+
+            subplot(2,2,1)
+            plot(optimValues.iteration,optimValues.fval(:,1))
+            title('Revenue Diff')
+
+            subplot(2,2,2)
+            plot(ptimValues.iteration,optimValues.fval(:,2))
+            title('Consumption Diff')
+
+            subplot(2,2,3)
+            plot(ptimValues.iteration,optimValues.x(:,1))
+            subtitle('Endogenous 1')
+
+            subplot(2,2,4)
+            plot(ptimValues.iteration,optimValues.x(:,2))
+            subtitle('Endogenous 2')
+
+        case 'done'
+            hold off
+        otherwise
+    end
+end
 
 end
         
