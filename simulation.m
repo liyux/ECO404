@@ -1,5 +1,10 @@
+clear all
 dbstop if error
+
 createHouseholds
+[sortedIncome, hhIncomeInd] = sort(hhIncome);
+numHHQuints = [.2 .4 .6 .8]*numhh;
+divideToIncomeQuintilesMat = [hhIncomeInd<=(.2*numhh) (hhIncomeInd>(.2*numhh))&(hhIncomeInd<=(.4*numhh)) (hhIncomeInd>(.4*numhh))&(hhIncomeInd<=(.6*numhh)) (hhIncomeInd>(.6*numhh))&(hhIncomeInd<=(.8*numhh)) (hhIncomeInd>(.8*numhh))];
 
 %coefmatrix = [constant coef.numpeople coef.hvalue coef.lawnsize coef.weather coef.income coef.price]
 demandInfo.hh_coeff = [-0.157 0.291 0.312 0.0247 0.979]'; 
@@ -48,7 +53,14 @@ arrayCol.endogFC = 8;
 arrayCol.script = 9;
 %name                   basePriceStructure	csInds          csvals          consType        endPr  endUL    endFC   experimentSpecificScript
 csArray = {
-'DentonSCutback'        DentonS             {[] [1] []}     [3.8 4]*inflationAdj     'dual'          [2]    [1]       []      'consumptionDown5pct';
+'DentonSCutback'        DentonS             {[] [1] []}     [3.7 3.8 3.9]*inflationAdj     'dual'          [2]    [1]       [1]      'consumptionDown5pct';
 };
  experiments
  
+
+%compare expenditure by household across base, uniform price with base
+%demand, uniform price reduced by 5% and various IBP prices
+quintileExpenditure = divideToIncomeQuintilesMat'*hhExpendMat{1};
+bar(quintileExpenditure)
+legend('Base IBP','Base Uniform','UniformReduced',['IPB,P1=' num2str(csArray{jj,arrayCol.csVals}(1))],['IPB,P1=' num2str(csArray{jj,arrayCol.csVals}(2))],['IPB,P1=' num2str(csArray{jj,arrayCol.csVals}(3))])
+

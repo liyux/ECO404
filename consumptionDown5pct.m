@@ -4,6 +4,9 @@ prU_0 = [mean(basePX.Price) basePX.FC]; %use the mean price and fixed charge of 
 pxStrU.base = [1e6  prU_0]';
 
 [uniformPriceBase,fval,exitflag] = fsolve(@(uniformPrice) revConsConstraint(uniformPrice,pxStrU,[baseRev; baseCons],demandInfo),prU_0);
+uniformPxStr = pxStrU.base;
+uniformPxStr(2:end) = uniformPriceBase;
+[rev, cons, uniformHHBase] = computeDemand(demandInfo, uniformPxStr);
 
 consumptionTarget = .95*baseCons;
 waterCost = .5; %if we want to have the revenue target fall to match reduced demand enter savings per thousand gallons here.
@@ -29,6 +32,8 @@ uniformOutput(jj).HHOutput = uniformHHOutput;
 uniformOutput(jj).price = uniformPrice(1);
 uniformOutput(jj).fixedCharge = uniformPrice(2);
 
-%reset base fixed charge to match uniform price results and set base price
+target.Rev = revenueTarget;
+target.Cons = consumptionTarget;
+%reset base fixed charge to match uniform price results
 pxStrInfo.base(end) = uniformOutput(jj).fixedCharge;
 
