@@ -1,3 +1,9 @@
+function csOutput = runExperiments(csArray,arrayCol,demandInfo);
+solveOptions = optimoptions('fsolve','Display','iter','outputFcn',@checkProgess);
+history.x = [];
+history.fval = [];
+searchdir = [];
+
 [numExp,csCols] = size(csArray);
 for jj=1:numExp
     
@@ -27,14 +33,25 @@ for jj=1:numExp
     csVals = csArray{jj,arrayCol.csVals};
     endogPS0 = pxStrInfo.base(pxStrInfo.endog);
     
-    %compare aggregate expenditures by different quintiles
-    hhExpendMat{jj} = [baseDemand.hhexp uniformHHBase.hhexp uniformHHOutput.hhexp];
-    hhConsumeMat{jj} = [baseDemand.demand uniformHHBase.demand uniformHHOutput.demand];
-
     for ii=1:length(csVals)
         pxStrInfo.base(csIndex) = csVals(ii);
-        
-        [optStr,fval,exitflag] = optimizePX(csArray{jj,arrayCol.consType},pxStrInfo,target,demandInfo,endogPS0);
+
+        switch csArray{jj,arrayCol.consType}
+            case 'rev'
+                if numel(endogPS0)~=1
+                    error(['You are trying to solve a single constraint problem and have ' num2str(numel(endogPS0)) ' endogenous variables.'])
+                end
+                [optStr,fval,exitflag] = fsolve(@(endogPS) revenueConstraint(endogPS,pxStrInfo,revenueTarget,demandInfo),endogPS0);
+
+            case 'dual'
+                if numel(endogPS0)~=2
+                    error(['You are trying to solve a dual constraint problem and have ' num2str(numel(endogPS0)) ' endogenous variables.'])
+                end
+                [optStr,fval,exitflag] = fsolve(@(endogPS) revConsConstraint(endogPS,pxStrInfo,consumptionTarget,demandInfo),endogPS0,solveOptions);
+            otherwise
+                error(['I don''t recognize the constraint type ' csArray{jj,arrayCol.consType}])
+        end
+
          if exitflag<1;
              disp('I ran into trouble solving for the IBP price that meets your goals. I''m stopping to let you figure out why.')
              keyboard
@@ -49,15 +66,54 @@ for jj=1:numExp
         optOutput(ii,jj).Cons = optCons;
         optOutput(ii,jj).Rev = optRev;
         optOutput(ii,jj).Prices = pxOpt(pxStrInfo.blks+1:2*pxStrInfo.blks);
-        optOutput(ii,jj).PriceIncs = pxOptInc(pxStrInfo.blks+1:2*pxStrInfo.blks);
         optOutput(ii,jj).Ulims = pxOpt(1:pxStrInfo.blks);
-        optOutput(ii,jj).BlkSizes = pxOptInc(1:pxStrInfo.blks);
-        optOutput(ii,jj).FCs = pxOpt(end);  
+        optOutput(ii,jj).FCs = pxOpt(end);
         optOutput(ii,jj).hhInfo = optHHInfo;
-        
-        hhExpendMat{jj} = [hhExpendMat{jj} optHHInfo.hhexp];
-        hhConsumeMat{jj} = [hhConsumeMat{jj} optHHInfo.demand];
     end
+
+    csOutput.optOutput = optOutput;
+    csOutput.uniform = uniformOutput;
+end
+
+function stop = outfun(x,optimValues,state)
+    stop = false;
+
+    switch state
+        case 'init'
+            hold on
+        case 'iter'
+            if iscolumn(fval)
+                history.fval = [history.fval; optimValues.fval'];
+            else
+                history.fval = [history.fval; optimValues.fval];
+            end
+            if iscolumn(x)
+                history.x = [history.x; x'];
+            else
+                history.x = [history.x; x];
+            end
+
+            subplot(2,2,1)
+            plot(optimValues.iteration,optimValues.fval(:,1))
+            title('Revenue Diff')
+
+            subplot(2,2,2)
+            plot(ptimValues.iteration,optimValues.fval(:,2))
+            title('Consumption Diff')
+
+            subplot(2,2,3)
+            plot(ptimValues.iteration,optimValues.x(:,1))
+            subtitle('Endogenous 1')
+
+            subplot(2,2,4)
+            plot(ptimValues.iteration,optimValues.x(:,2))
+            subtitle('Endogenous 2')
+
+        case 'done'
+            hold off
+        otherwise
+    end
+end
 
 end
         
